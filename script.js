@@ -246,7 +246,6 @@ function drawSignal() {
 }
 
 // Función que se llama cuando se hace clic en el botón "Exportar"
-// Función que se llama cuando se hace clic en el botón "Exportar"
 function exportGraph(size) {
     if (!isGraphDrawn) {
         showAlert('Por favor, dibuje el gráfico antes de exportarlo.');

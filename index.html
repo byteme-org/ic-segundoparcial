@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de señales</title>
+    <title>Generador de señales & Apuntes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/svg+xml" href="icono.svg">
 </head>
 
-<body class="flex flex-col min-h-screen bg-gray-900 text-gray-200">
+<body class="flex flex-col min-h-screen bg-gray-900 text-gray-200 font-sans">
 <div class="flex-grow">
     <nav class="bg-gray-800 shadow-md border-b border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -19,17 +19,18 @@
 
                 <div class="w-full md:w-auto">
                     <label for="waveType" class="block text-sm font-medium text-gray-300 mb-1">Tipo de onda:</label>
-                    <select id="waveType" class="block w-full bg-gray-700 border border-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    <select id="waveType" class="block w-full bg-gray-700 border border-gray-600 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                         <option value="NRZ-L">NRZ-L</option>
                         <option value="NRZ-I">NRZ-I</option>
                         <option value="Manchester">Manchester</option>
                         <option value="Manchester Diferencial">Manchester Diferencial</option>
+                        <option value="Bipolar">Bipolar (AMI)</option>
                     </select>
                 </div>
 
                 <div class="w-full md:w-auto">
                     <label for="startLevel" class="block text-sm font-medium text-gray-300 mb-1">Nivel de inicio:</label>
-                    <select id="startLevel" class="block w-full bg-gray-800 border border-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    <select id="startLevel" class="block w-full bg-gray-700 border border-gray-600 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                         <option value="1">Arriba</option>
                         <option value="-1">Abajo</option>
                     </select>
@@ -37,7 +38,7 @@
 
                 <div class="w-full md:w-auto flex-grow max-w-xs">
                     <label for="data" class="block text-sm font-medium text-gray-300 mb-1">Datos:</label>
-                    <input type="text" id="data" class="block w-full bg-gray-800 border border-gray-700 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    <input type="text" id="data" class="block w-full bg-gray-700 border border-gray-600 text-white rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Ej: 101100">
                 </div>
 
                 <div class="w-full md:w-auto">
@@ -63,14 +64,14 @@
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <div id="alert" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div id="alert" class="hidden bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded relative mb-4" role="alert">
             <span id="alert-message" class="block sm:inline"></span>
             <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="document.getElementById('alert').style.display='none'">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
-        <div id="nrzi-alert" class="hidden bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded relative mb-4" role="alert">
+        <div id="nrzi-alert" class="hidden bg-yellow-900 border border-yellow-700 text-yellow-200 px-4 py-3 rounded relative mb-4" role="alert">
             <span class="block sm:inline">Recuerde que el nivel de inicio invierte el gráfico.</span>
             <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="document.getElementById('nrzi-alert').style.display='none'">
                 <i class="bi bi-x-lg"></i>
@@ -78,23 +79,139 @@
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex justify-center w-full">
-        <div id="myDiv" class="w-full max-w-full overflow-x-auto bg-gray-800 p-4 shadow-sm rounded-lg border border-gray-850 min-h-[400px]">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-center w-full">
+        <div id="myDiv" class="w-full max-w-full overflow-x-auto bg-gray-800 p-4 shadow-sm rounded-lg border border-gray-700 min-h-[400px]">
         </div>
     </main>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+                <h3 class="text-xl font-bold mb-2 text-blue-400 border-b border-gray-700 pb-2">Calculadora Nyquist</h3>
+                <p class="text-xs text-gray-400 mb-2 font-mono">C = 2 * B * log2(M)</p>
+                <p class="text-xs text-yellow-500 mb-4 font-semibold"><i class="bi bi-info-circle"></i> Dejá en blanco el valor a calcular.</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm text-gray-300">Capacidad (C) [bps]:</label>
+                        <input type="number" id="nyqC" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" placeholder="Ej: 64000">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300">Ancho de banda (B) [Hz]:</label>
+                        <input type="number" id="nyqB" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" placeholder="Ej: 4000">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300">Niveles de señal (M):</label>
+                        <input type="number" id="nyqM" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" placeholder="Ej: 256">
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="calcNyquist()" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded transition">Calcular</button>
+                        <button onclick="limpiarNyquist()" class="bg-gray-600 hover:bg-gray-500 text-white text-sm py-2 px-3 rounded transition" title="Limpiar"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <div id="nyqMsg" class="text-sm text-center mt-2 h-5"></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+                <h3 class="text-xl font-bold mb-2 text-purple-400 border-b border-gray-700 pb-2">Calculadora Shannon</h3>
+                <p class="text-xs text-gray-400 mb-2 font-mono">C = B * log2(1 + S/N)</p>
+                <p class="text-xs text-yellow-500 mb-4 font-semibold"><i class="bi bi-info-circle"></i> Dejá en blanco el valor a calcular.</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm text-gray-300">Capacidad Máx (C) [bps]:</label>
+                        <input type="number" id="shanC" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300">Ancho de banda (B) [Hz]:</label>
+                        <input type="number" id="shanB" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300">Relación S/N (en veces):</label>
+                        <input type="number" id="shanSN" class="mt-1 w-full bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-gray-500">
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="calcShannon()" class="flex-grow bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold py-2 rounded transition">Calcular</button>
+                        <button onclick="limpiarShannon()" class="bg-gray-600 hover:bg-gray-500 text-white text-sm py-2 px-3 rounded transition" title="Limpiar"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <div id="shanMsg" class="text-sm text-center mt-2 h-5"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700 flex flex-col h-[650px]">
+            <h3 class="text-2xl font-bold mb-2 text-yellow-500 flex items-center gap-2">
+                <i class="bi bi-journal-text"></i> Cheatsheet
+            </h3>
+            <p class="text-sm text-gray-400 mb-4 border-b border-gray-700 pb-2">Resumen rápido de conceptos clave para justificar escenarios.</p>
+
+            <div class="overflow-y-auto flex-grow pr-2 space-y-6 text-sm text-gray-300 custom-scrollbar">
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-2">1. Redes & Sistemas Distribuidos</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-blue-300">Broadcast vs Punto a Punto:</strong> WiFi o switch es multipunto (compartido)[cite: 11, 12, 24]. Enlace entre sucursales/VPN es punto a punto (dedicado)[cite: 20, 24].</li>
+                        <li><strong class="text-blue-300">Sistemas Distribuidos:</strong> Oculta la complejidad de la red mediante <em>middleware</em>[cite: 39, 40]. Si crece sin perder rendimiento es <em>Escalable</em>[cite: 55]. Si falla un nodo y no se nota, maneja <em>Fallos/Transparencia</em>[cite: 49, 65, 66].</li>
+                        <li><strong class="text-blue-300">CDN:</strong> Ejemplo híbrido que distribuye carga para escalabilidad y disponibilidad[cite: 86, 93, 94].</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-2">2. Seguridad</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-purple-300">Canal Seguro:</strong> Requiere autenticación de extremos y cifrado de datos[cite: 100].</li>
+                        <li><strong class="text-purple-300">Cifrado:</strong> Simétrico (AES) usa misma clave[cite: 126, 129]. Asimétrico (RSA) usa pública/privada, no tiene problema de distribución[cite: 135, 138, 139].</li>
+                        <li><strong class="text-purple-300">Integridad:</strong> Firma digital (hash + clave privada) garantiza que no hubo modificaciones y evita el repudio[cite: 144, 145, 146].</li>
+                        <li><strong class="text-purple-300">Firewalls:</strong> <em>Packet Filtering</em> filtra por IP/Puerto sin memoria[cite: 162, 163]. <em>Stateful</em> recuerda conexiones[cite: 168]. <em>Proxy</em> analiza contenido[cite: 173].</li>
+                        <li><strong class="text-purple-300">VPN & SSH:</strong> VPN crea un túnel cifrado sobre Internet[cite: 183]. SSH usa asimétrico (Diffie-Hellman) para negociar y simétrico (AES) para el tráfico[cite: 210, 216].</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-2">3. Medios & Perturbaciones</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-green-300">Medios:</strong> UTP (barato, corto)[cite: 322]. STP (entorno industrial con ruido)[cite: 328, 329]. Fibra Óptica (inmune al ruido EM, largas distancias, máxima seguridad)[cite: 344, 345, 349, 350].</li>
+                        <li><strong class="text-green-300">Atenuación:</strong> Señal llega débil con la distancia. Solución: repetidores[cite: 383, 387].</li>
+                        <li><strong class="text-green-300">Distorsión de retardo:</strong> Frecuencias llegan desfasadas deformando la señal. Solución: ecualizadores[cite: 393, 394, 396].</li>
+                        <li><strong class="text-green-300">Ruido:</strong> <em>Térmico</em> (límite físico, no se elimina)[cite: 401, 405]. <em>Impulsivo</em> (tormentas/motores, rompe bits digitales)[cite: 418, 420]. <em>Diafonía</em> (interferencia de cables cercanos)[cite: 413, 414].</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-2">4. Conversión & Capacidad</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-red-300">Nyquist & Shannon:</strong> Nyquist marca el límite ideal[cite: 446]. Shannon da el límite real con ruido[cite: 454]. Para mejorar C, se debe subir B (ancho de banda) o subir S/N (potencia/bajar ruido)[cite: 460].</li>
+                        <li><strong class="text-red-300">Voz a IP (PCM):</strong> Analógico a Digital. Pasos: Muestreo (PAM), Cuantificación y Codificación[cite: 496, 499, 506, 510].</li>
+                        <li><strong class="text-red-300">Modulación Digital (WiFi/ADSL):</strong> Datos digitales en onda analógica. Técnicas: ASK, FSK, PSK, QAM (la más rápida)[cite: 483, 485, 487, 489, 491].</li>
+                        <li><strong class="text-red-300">Codificación Base:</strong> NRZ (simple)[cite: 527]. Manchester (transición al medio, buena sincronización)[cite: 529, 530].</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
 </div>
 
-<footer class="mt-auto py-6 bg-gray-900 text-gray-400">
+<footer class="mt-auto py-6 bg-gray-900 text-gray-400 border-t border-gray-800">
     <div class="container mx-auto text-center px-4">
+        <p>Sitio desarrollado por: <br></p>
         <a href="https://github.com/byteme-org" target="_blank" class="hover:text-white transition duration-200 text-decoration-none">
-            Sitio desarrollado por: <br>
             <i class="bi bi-github text-xl"></i> <span class="font-semibold">ByteMe</span>
+        </a>
+        <a href="https://instagram.com/byteme_gg" target="_blank" class="hover:text-white transition duration-200 text-decoration-none ml-4">
+            <i class="bi bi-instagram text-xl"></i> <span class="font-semibold">@byteme_gg</span>
         </a>
     </div>
 </footer>
 
+<style>
+    /* Estilo para la barra de desplazamiento del cheatsheet */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+</style>
+
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="script.js"></script>
 </body>
-
 </html>
